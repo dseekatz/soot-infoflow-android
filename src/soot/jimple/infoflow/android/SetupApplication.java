@@ -10,29 +10,11 @@
  ******************************************************************************/
 package soot.jimple.infoflow.android;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import javax.activation.UnsupportedDataTypeException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 import org.xmlpull.v1.XmlPullParserException;
-
-import soot.Main;
-import soot.PackManager;
-import soot.Scene;
-import soot.SootClass;
-import soot.SootMethod;
+import soot.*;
 import soot.jimple.Stmt;
 import soot.jimple.infoflow.AbstractInfoflow;
 import soot.jimple.infoflow.Infoflow;
@@ -64,6 +46,12 @@ import soot.jimple.infoflow.source.data.SourceSinkDefinition;
 import soot.jimple.infoflow.taintWrappers.ITaintPropagationWrapper;
 import soot.options.Options;
 import st.cs.uni.saarland.de.MudflowHelper;
+
+import javax.activation.UnsupportedDataTypeException;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.Map.Entry;
 
 public class SetupApplication {
 
@@ -789,7 +777,7 @@ public class SetupApplication {
 	 * @return The results of the data flow analysis
 	 */
 	public InfoflowResults runInfoflow() {
-		return runInfoflow(null);
+		return runInfoflow(null, true);
 	}
 
 	/**
@@ -799,7 +787,7 @@ public class SetupApplication {
 	 *            The callback to be invoked when data flow results are available
 	 * @return The results of the data flow analysis
 	 */
-	public InfoflowResults runInfoflow(ResultsAvailableHandler onResultsAvailable) {
+	public InfoflowResults runInfoflow(ResultsAvailableHandler onResultsAvailable, boolean computeEntryPoints) {
 		if (this.sourceSinkProvider == null)
 			throw new RuntimeException("Sources and/or sinks not calculated yet");
 
@@ -832,8 +820,12 @@ public class SetupApplication {
 		if (null != ipcManager) {
 			info.setIPCManager(ipcManager);
 		}
-
-		info.computeInfoflow(apkFileLocation, path, entryPointCreator, sourceSinkManager);
+		if(computeEntryPoints) {
+			info.computeInfoflow(apkFileLocation, path, entryPointCreator, sourceSinkManager);
+		}
+		else{
+			info.runAnalysis(sourceSinkManager, null);
+		}
 		this.maxMemoryConsumption = info.getMaxMemoryConsumption();
 		this.collectedSources = info.getCollectedSources();
 		this.collectedSinks = info.getCollectedSinks();
