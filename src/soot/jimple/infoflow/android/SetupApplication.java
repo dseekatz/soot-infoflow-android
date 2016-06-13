@@ -408,12 +408,12 @@ public class SetupApplication {
 				// Some informational output
 				System.out.println("Found " + lfp.getUserControls() + " layout controls");
 			}
+
+			// Clean up everything we no longer need
+			soot.G.reset();
 		}
 		
 		System.out.println("Entry point calculation done.");
-
-		// Clean up everything we no longer need
-		soot.G.reset();
 
 		// Create the SourceSinkManager
 		{
