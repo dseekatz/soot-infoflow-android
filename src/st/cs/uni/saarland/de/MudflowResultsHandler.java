@@ -1,10 +1,7 @@
 package st.cs.uni.saarland.de;
 
-import soot.Body;
-import soot.Local;
-import soot.SootMethod;
-import soot.Unit;
-import soot.Value;
+import com.thoughtworks.xstream.XStream;
+import soot.*;
 import soot.jimple.AssignStmt;
 import soot.jimple.Stmt;
 import soot.jimple.infoflow.handlers.ResultsAvailableHandler;
@@ -16,21 +13,15 @@ import soot.toolkits.graph.ExceptionalUnitGraph;
 import soot.toolkits.graph.MHGDominatorsFinder;
 import soot.util.MultiMap;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.thoughtworks.xstream.XStream;
-
 public class MudflowResultsHandler implements ResultsAvailableHandler {
 	
-	private static final String RESULTS_DIR = "results";
-	private String apkName;
+	protected static final String RESULTS_DIR = "results";
+	protected String apkName;
 	private List<String> uriMethodSignatures;
 	private List<String> getOfContentResolvers;
 	
@@ -38,7 +29,7 @@ public class MudflowResultsHandler implements ResultsAvailableHandler {
 		this.apkName = apkName;
 	}
 	
-	private static void createDirIfNotExsist(String name){
+	protected static void createDirIfNotExsist(String name){
 		File theDir = new File(name);
 		if (!theDir.exists()) {
 			theDir.mkdir();
@@ -185,7 +176,11 @@ public class MudflowResultsHandler implements ResultsAvailableHandler {
 				System.out.println(flowDroidResults);
 			}
 		}
-		
+
+		saveDataflows(flowdroidResults);
+	}
+
+	protected void saveDataflows(List<FlowdroidResults> flowdroidResults) {
 		XStream xStream = new XStream();
 		xStream.processAnnotations(FlowdroidResults.class);
 		xStream.processAnnotations(FlowdroidEndpoint.class);
