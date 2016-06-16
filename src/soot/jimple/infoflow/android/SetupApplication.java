@@ -777,7 +777,7 @@ public class SetupApplication {
 	 * @return The results of the data flow analysis
 	 */
 	public InfoflowResults runInfoflow() {
-		return runInfoflow(null, true);
+		return runInfoflow(null, null);
 	}
 
 	/**
@@ -787,7 +787,7 @@ public class SetupApplication {
 	 *            The callback to be invoked when data flow results are available
 	 * @return The results of the data flow analysis
 	 */
-	public InfoflowResults runInfoflow(ResultsAvailableHandler onResultsAvailable, boolean computeEntryPoints) {
+	public InfoflowResults runInfoflow(ResultsAvailableHandler onResultsAvailable, SootMethod entryPoint) {
 		if (this.sourceSinkProvider == null)
 			throw new RuntimeException("Sources and/or sinks not calculated yet");
 
@@ -820,11 +820,11 @@ public class SetupApplication {
 		if (null != ipcManager) {
 			info.setIPCManager(ipcManager);
 		}
-		if(computeEntryPoints) {
+		if(entryPoint == null) {
 			info.computeInfoflow(apkFileLocation, path, entryPointCreator, sourceSinkManager);
 		}
 		else{
-			info.runAnalysis(sourceSinkManager, null);
+			info.runAnalysis(sourceSinkManager, null ,entryPoint);
 		}
 		this.maxMemoryConsumption = info.getMaxMemoryConsumption();
 		this.collectedSources = info.getCollectedSources();
