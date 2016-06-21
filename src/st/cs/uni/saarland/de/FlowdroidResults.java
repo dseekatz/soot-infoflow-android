@@ -1,5 +1,7 @@
 package st.cs.uni.saarland.de;
 
+import soot.jimple.Stmt;
+
 public class FlowdroidResults {
 	private final FlowdroidEndpoint source;
 	public FlowdroidEndpoint getSource() {
@@ -11,10 +13,17 @@ public class FlowdroidResults {
 	public FlowdroidEndpoint getSink() {
 		return sink;
 	}
-
-	public FlowdroidResults(FlowdroidEndpoint source, FlowdroidEndpoint sink){
+	
+	private final String[] path;
+	
+	public String[] getPath(){
+		return path;
+	}
+	
+	public FlowdroidResults(FlowdroidEndpoint source, FlowdroidEndpoint sink, String[] path){
 		this.source = source;
 		this.sink = sink;
+		this.path = path;
 	}
 	
 	@Override

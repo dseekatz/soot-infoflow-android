@@ -174,7 +174,7 @@ public class CsvGenerator {
 					sink = new FlowdroidEndpoint("SHARED_PREFERENCES", sink.getCallerMethod());
 				}
 				iter.remove();
-				iter.add(new FlowdroidResults(source, sink));
+				iter.add(new FlowdroidResults(source, sink, x.getPath()));
 			}
 			
 			AppInfo info = new AppInfo(file.getName().replace("_results.xml", ".apk"), isMalicious);

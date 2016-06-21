@@ -149,7 +149,16 @@ public class MudflowResultsHandler implements ResultsAvailableHandler {
 				sourcesInDataflows.add(sourceInfo.getSource());
 				sinksInDataflows.add(sinkInfo.getSink());
 				FlowdroidEndpoint sourceEndpoint = new FlowdroidEndpoint(sourceSignature, callerOfSource.getSignature());
-				FlowdroidResults flowDroidResults = new FlowdroidResults(sourceEndpoint, sinkEndpoint);
+				String path[] = new String[]{};
+				if(sourceInfo.getPath() != null){
+					path = new String[sourceInfo.getPath().length];
+					int pathIterator = 0;
+					for(Stmt pathEntry: sourceInfo.getPath()){
+						path[pathIterator++] = cfg.getMethodOf(pathEntry).getSignature();
+					}
+				}
+				
+				FlowdroidResults flowDroidResults = new FlowdroidResults(sourceEndpoint, sinkEndpoint, path);
 				flowdroidResults.add(flowDroidResults);
 				System.out.println(flowDroidResults);
 			}
@@ -160,7 +169,7 @@ public class MudflowResultsHandler implements ResultsAvailableHandler {
 		for(Stmt source : MudflowHelper.getCollectedSources()){
 			if(!sourcesInDataflows.contains(source) && source.containsInvokeExpr() && !source.getInvokeExpr().getMethod().getSignature().equals(CONTENT_RESOLVER_CONSTANTS.QUERY)){
 				FlowdroidEndpoint sourceEndpoint = new FlowdroidEndpoint(source.getInvokeExpr().getMethod().getSignature(), cfg.getMethodOf(source).getSignature());
-				FlowdroidResults flowDroidResults = new FlowdroidResults(sourceEndpoint, nsSinkEndpoint);
+				FlowdroidResults flowDroidResults = new FlowdroidResults(sourceEndpoint, nsSinkEndpoint, new String[]{});
 				flowdroidResults.add(flowDroidResults);
 				System.out.println(flowDroidResults);
 			}
@@ -171,7 +180,7 @@ public class MudflowResultsHandler implements ResultsAvailableHandler {
 		for(Stmt sink : MudflowHelper.getCollectedSinks()){
 			if(!sinksInDataflows.contains(sink) && sink.containsInvokeExpr()){
 				FlowdroidEndpoint sinkEndpoint = new FlowdroidEndpoint(sink.getInvokeExpr().getMethod().getSignature(), cfg.getMethodOf(sink).getSignature());					
-				FlowdroidResults flowDroidResults = new FlowdroidResults(nsSourceEndpoint, sinkEndpoint);
+				FlowdroidResults flowDroidResults = new FlowdroidResults(nsSourceEndpoint, sinkEndpoint, new String[]{});
 				flowdroidResults.add(flowDroidResults);
 				System.out.println(flowDroidResults);
 			}
