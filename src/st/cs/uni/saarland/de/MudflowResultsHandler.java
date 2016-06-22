@@ -149,12 +149,11 @@ public class MudflowResultsHandler implements ResultsAvailableHandler {
 				sourcesInDataflows.add(sourceInfo.getSource());
 				sinksInDataflows.add(sinkInfo.getSink());
 				FlowdroidEndpoint sourceEndpoint = new FlowdroidEndpoint(sourceSignature, callerOfSource.getSignature());
-				String path[] = new String[]{};
+				List<DataflowPathItem> path = new ArrayList<>();
 				if(sourceInfo.getPath() != null){
-					path = new String[sourceInfo.getPath().length];
-					int pathIterator = 0;
-					for(Stmt pathEntry: sourceInfo.getPath()){
-						path[pathIterator++] = cfg.getMethodOf(pathEntry).getSignature();
+					for(Stmt pathEntry: sourceInfo.getPath()){						
+						DataflowPathItem pItem = new DataflowPathItem(cfg.getMethodOf(pathEntry), pathEntry, getNumberInMethodUnits(pathEntry, cfg.getMethodOf(pathEntry).getActiveBody()));
+						path.add(pItem);
 					}
 				}
 				
@@ -169,7 +168,7 @@ public class MudflowResultsHandler implements ResultsAvailableHandler {
 		for(Stmt source : MudflowHelper.getCollectedSources()){
 			if(!sourcesInDataflows.contains(source) && source.containsInvokeExpr() && !source.getInvokeExpr().getMethod().getSignature().equals(CONTENT_RESOLVER_CONSTANTS.QUERY)){
 				FlowdroidEndpoint sourceEndpoint = new FlowdroidEndpoint(source.getInvokeExpr().getMethod().getSignature(), cfg.getMethodOf(source).getSignature());
-				FlowdroidResults flowDroidResults = new FlowdroidResults(sourceEndpoint, nsSinkEndpoint, new String[]{});
+				FlowdroidResults flowDroidResults = new FlowdroidResults(sourceEndpoint, nsSinkEndpoint, new ArrayList<>());
 				flowdroidResults.add(flowDroidResults);
 				System.out.println(flowDroidResults);
 			}
@@ -180,13 +179,24 @@ public class MudflowResultsHandler implements ResultsAvailableHandler {
 		for(Stmt sink : MudflowHelper.getCollectedSinks()){
 			if(!sinksInDataflows.contains(sink) && sink.containsInvokeExpr()){
 				FlowdroidEndpoint sinkEndpoint = new FlowdroidEndpoint(sink.getInvokeExpr().getMethod().getSignature(), cfg.getMethodOf(sink).getSignature());					
-				FlowdroidResults flowDroidResults = new FlowdroidResults(nsSourceEndpoint, sinkEndpoint, new String[]{});
+				FlowdroidResults flowDroidResults = new FlowdroidResults(nsSourceEndpoint, sinkEndpoint, new ArrayList<>());
 				flowdroidResults.add(flowDroidResults);
 				System.out.println(flowDroidResults);
 			}
 		}
 
 		saveDataflows(flowdroidResults);
+	}
+	
+	private int getNumberInMethodUnits(Stmt stmt, Body b){
+		int counter = 0;
+		for(final Unit u: b.getUnits()){
+			if(u.equals(stmt)){
+				return counter;
+			}
+			counter++;
+		}
+		return -1;
 	}
 
 	protected void saveDataflows(List<FlowdroidResults> flowdroidResults) {

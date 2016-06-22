@@ -1,5 +1,7 @@
 package st.cs.uni.saarland.de;
 
+import java.util.List;
+
 import soot.jimple.Stmt;
 
 public class FlowdroidResults {
@@ -14,13 +16,13 @@ public class FlowdroidResults {
 		return sink;
 	}
 	
-	private final String[] path;
+	private final List<DataflowPathItem> path;
 	
-	public String[] getPath(){
+	public List<DataflowPathItem> getPath(){
 		return path;
 	}
 	
-	public FlowdroidResults(FlowdroidEndpoint source, FlowdroidEndpoint sink, String[] path){
+	public FlowdroidResults(FlowdroidEndpoint source, FlowdroidEndpoint sink, List<DataflowPathItem> path){
 		this.source = source;
 		this.sink = sink;
 		this.path = path;
