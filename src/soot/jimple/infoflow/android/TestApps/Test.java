@@ -392,6 +392,10 @@ public class Test {
 				config.setMaxThreadNum(Integer.valueOf(args[i+1]));
 				i += 2;
 			}
+			else if (args[i].equalsIgnoreCase("--arraysizetainting")) {
+				config.setEnableArraySizeTainting(true);
+				i++;
+			}
 			else
 				i++;
 		}
@@ -490,7 +494,8 @@ public class Test {
 				InfoflowAndroidConfiguration.getUseThisChainReduction() ? "" : "--safemode",
 				config.getLogSourcesAndSinks() ? "--logsourcesandsinks" : "",
 				"--callbackanalyzer", callbackAlgorithmToString(config.getCallbackAnalyzer()),
-				"--maxthreadnum", Integer.toString(config.getMaxThreadNum())
+				"--maxthreadnum", Integer.toString(config.getMaxThreadNum()),
+				config.getEnableArraySizeTainting() ? "--arraysizetainting" : ""
 				};
 		System.out.println("Running command: " + executable + " " + Arrays.toString(command));
 		try {
@@ -603,10 +608,19 @@ public class Test {
 			}
 			else {
 				final EasyTaintWrapper easyTaintWrapper;
-				if (new File("../soot-infoflow/EasyTaintWrapperSource.txt").exists())
-					easyTaintWrapper = new EasyTaintWrapper("../soot-infoflow/EasyTaintWrapperSource.txt");
-				else
-					easyTaintWrapper = new EasyTaintWrapper("EasyTaintWrapperSource.txt");
+				File twSourceFile = new File("../soot-infoflow/EasyTaintWrapperSource.txt");
+				if (twSourceFile.exists())
+					easyTaintWrapper = new EasyTaintWrapper(twSourceFile);
+				else {
+					twSourceFile = new File("EasyTaintWrapperSource.txt");
+					if (twSourceFile.exists())
+						easyTaintWrapper = new EasyTaintWrapper(twSourceFile);
+					else {
+						System.err.println("Taint wrapper definition file not found at "
+								+ twSourceFile.getAbsolutePath());
+						return null;
+					}
+				}
 				easyTaintWrapper.setAggressiveMode(aggressiveTaintWrapper);
 				taintWrapper = easyTaintWrapper;
 			}
@@ -660,13 +674,14 @@ public class Test {
 	private static ITaintPropagationWrapper createLibrarySummaryTW()
 			throws IOException {
 		try {
-			Class clzLazySummary = Class.forName("soot.jimple.infoflow.methodSummary.data.summary.LazySummary");
+			Class clzLazySummary = Class.forName("soot.jimple.infoflow.methodSummary.data.provider.LazySummaryProvider");
+			Class itfLazySummary = Class.forName("soot.jimple.infoflow.methodSummary.data.provider.IMethodSummaryProvider");
 			
 			Object lazySummary = clzLazySummary.getConstructor(File.class).newInstance(new File(summaryPath));
 			
 			ITaintPropagationWrapper summaryWrapper = (ITaintPropagationWrapper) Class.forName
 					("soot.jimple.infoflow.methodSummary.taintWrappers.SummaryTaintWrapper").getConstructor
-					(clzLazySummary).newInstance(lazySummary);
+					(itfLazySummary).newInstance(lazySummary);
 			
 			ITaintPropagationWrapper systemClassWrapper = new ITaintPropagationWrapper() {
 				
