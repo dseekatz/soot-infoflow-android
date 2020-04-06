@@ -20,10 +20,18 @@ import java.util.List;
 
 public class MudflowResultsHandler implements ResultsAvailableHandler {
 	
-	protected static final String RESULTS_DIR = "results";
+	protected String resultsDir;
 	protected String apkName;
 	private List<String> uriMethodSignatures;
 	private List<String> getOfContentResolvers;
+
+	public MudflowResultsHandler(String resultsDir) {
+		if (resultsDir == null || resultsDir.isEmpty()) {
+			this.resultsDir = "results";
+		} else {
+			this.resultsDir = resultsDir;
+		}
+	}
 	
 	public void setApkName(String apkName){
 		this.apkName = apkName;
@@ -204,10 +212,10 @@ public class MudflowResultsHandler implements ResultsAvailableHandler {
 		xStream.processAnnotations(FlowdroidResults.class);
 		xStream.processAnnotations(FlowdroidEndpoint.class);
 		xStream.setMode(XStream.NO_REFERENCES);
-		createDirIfNotExsist(RESULTS_DIR);
+		createDirIfNotExsist(resultsDir);
 		try (BufferedWriter bw = new BufferedWriter(
                 new OutputStreamWriter(
-                        new FileOutputStream(String.format(RESULTS_DIR + File.separator + "%s_results.xml", this.apkName)), StandardCharsets.UTF_8))) {
+                        new FileOutputStream(String.format(resultsDir + File.separator + "%s_results.xml", this.apkName)), StandardCharsets.UTF_8))) {
             bw.append(xStream.toXML(flowdroidResults));
         } catch (IOException exception) {
             exception.printStackTrace();
